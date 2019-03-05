@@ -1,10 +1,10 @@
-import json
 import re
 import sys
-
 from contextlib import closing
 
 from bs4 import BeautifulSoup
+
+from common import load_json, save_json
 
 DOW_TEXT_NUM_DICT = {
     'pn': 1,
@@ -18,17 +18,6 @@ DOW_TEXT_NUM_DICT = {
 def chunks(source, chunk_size):
     for i in range(0, len(source), chunk_size):
         yield source[i:i + chunk_size]
-
-
-def load_json(filename):
-    with closing(open(filename, 'r')) as raw_json:
-        loaded_json = json.load(raw_json)
-    return loaded_json
-
-def save_json(filename, object):
-    with closing(open(filename, 'w')) as raw_json:
-        json.dump(object, raw_json, indent=4, sort_keys=True)
-
 
 
 def main():
@@ -55,10 +44,9 @@ def main():
         course_code = line_1_td_list[1].text.strip()
 
         line_2_td_list = line_2.find_all('td', recursive=False)
-        #print("Prowadzący: {}".format(
+        # print("Prowadzący: {}".format(
         #    re.sub(r'\s+', ' ', line_2_td_list[0].text.strip())))
         #profesor_name = re.sub(r'\s+', ' ', line_2_td_list[0].text.strip())
-        
 
         line_3_table_td_list = line_3.find('table').find_all('td')
         time_list = [td.text for td in line_3_table_td_list]
@@ -77,16 +65,20 @@ def main():
             if par_ind in ('TP', 'TN'):
                 ftw_dict['par'] = 1 if par_ind == 'TN' else 2
             formatted_time_list.append(ftw_dict)
-        
+
+        if 'courses' not in group_repo:
+            group_repo['courses'] = {}
+
         if course_code not in group_repo['courses']:
             course_dict = {}
             group_repo['courses'][course_code] = course_dict
         else:
             course_dict = group_repo['courses'][course_code]
-        
+
         course_dict[group_code] = formatted_time_list
 
     save_json(sys.argv[2], group_repo)
+
 
 if __name__ == "__main__":
     main()
