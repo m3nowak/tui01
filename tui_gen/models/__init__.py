@@ -1,3 +1,6 @@
+"""
+Module containing models used by genetic algorithm/
+"""
 from tui_gen.models.group import Group
 
 def parse_raw_course_dict(raw_course_dict):
