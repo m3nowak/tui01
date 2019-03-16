@@ -1,16 +1,22 @@
 import sys
 
+import argparse
+
 from common import load_json
 from tui_gen.models import parse_raw_course_dict
-from tui_gen.gen_alg.rating import rate_chromosome
-from tui_gen import gen_alg
+from tui_gen.gen_alg import genetic_algorithm
+
 
 def main():
-    input_filepath = sys.argv[1]
+    #parser = argparse.ArgumentParser(description="PWR scheduling using genetic algorithm")
+    #parser.add_argument('problem', help="JSON file of problem")
+
+    #args = parser.parse_args()
+    input_filepath = './artifacts/sem8.json'
     raw_dict = load_json(input_filepath)
     prepared_dict = parse_raw_course_dict(raw_dict)
-    chromosome = gen_alg.create_random_chromosome(prepared_dict)
-    rate_chromosome(chromosome, raw_dict.get("scoring", {}))
+    alg_gen_report = genetic_algorithm(prepared_dict, 20, 0.7, 0.1, 5, raw_dict.get("scoring", {}))
+    print(alg_gen_report.printable_summary())
 
 
 if __name__ == "__main__":

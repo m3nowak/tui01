@@ -22,7 +22,7 @@ _HOUR_17 = datetime(1900, 1, 1, 17, 0)
 _SPAN_2H = timedelta(hours=2)
 
 
-def _create_fenotype(chromosome):
+def create_fenotype(chromosome):
     """
     Create fenotype for rating.
     :param dict chromosome: source chromosome
@@ -165,7 +165,7 @@ def rate_chromosome(chromosome, scoring_values):
     not_before_11_bonus = scoring_values.get("notBefore11Bonus", _DEFAULT_NOT_BEFORE_11_BONUS)
     not_after_15_bonus = scoring_values.get("notAfter15Bonus", _DEFAULT_NOT_AFTER_15_BONUS)
 
-    fenotype = _create_fenotype(chromosome)
+    fenotype = create_fenotype(chromosome)
 
     score_conflict_penalty = conflict_penalty * _count_conflicts(fenotype)
     score_before_9_penalty = before_9_penalty * _count_before_9(fenotype)
@@ -181,3 +181,13 @@ def rate_chromosome(chromosome, scoring_values):
         score_not_before_11_bonus + score_not_after_15_bonus
 
     return score
+
+
+def rate_population(population, scoring_values):
+    """
+    Calculate rating for population.
+
+    :param list population: population to score
+    :return list: list of scores
+    """
+    return [rate_chromosome(chromo, scoring_values) for chromo in population]
