@@ -3,7 +3,7 @@ Module containing genetic algorithm logic.
 """
 from copy import copy
 import math
-from random import choice as rand_choice, randrange, random, choices as rand_choices
+from random import choice as rand_choice, randrange, random, choices as rand_choices, sample
 from datetime import datetime
 
 import numpy as np
@@ -12,16 +12,55 @@ from tui_gen.gen_alg.rating import rate_population
 from tui_gen.gen_alg.genetic_algorithm_report import GeneticAlgorithmReport
 
 
-def roulette_selection(population, population_rating):
+def tournament_selection(population, population_rating, tour_size=3):
     """
-    Perform roulette selection.
+    Perform tournament selection.
     :param list population: population to perform selection on
     :param list population_rating: rating of population members
+    """
+    survived_population = []
+    population_rating_np = np.array(population_rating)
+    for _ in population:
+        chosen_indicies = sample(range(len(population)), k=tour_size)
+        index_of_chosen_indicies = np.argmax(population_rating_np[chosen_indicies])
+        pop_index_chosen = chosen_indicies[index_of_chosen_indicies]
+        survived_population.append(population[pop_index_chosen])
+    return survived_population
+
+
+def logistic(population_rating):
+    """
+    Calculate sigmoid for population ratings.
+    :param list population_rating: rating of population members
+    :returns list: rayings with sigmoid applied
+    """
+    np_population_rating = np.array(population_rating)
+    np_population_rating_softplus = np.log(1/(1 + np.exp(np_population_rating*-1)))
+    scores_softplus = np_population_rating_softplus.tolist()
+    return scores_softplus
+
+
+def softplus(population_rating):
+    """
+    Calculate softplus for population ratings.
+    :param list population_rating: rating of population members
+    :returns list: rayings with softlus applied
     """
     np_population_rating = np.array(population_rating)
     np_population_rating_softplus = np.log(1 + np.exp(np_population_rating))
     scores_softplus = np_population_rating_softplus.tolist()
-    return rand_choices(population, weights=scores_softplus, k=len(population))
+    return scores_softplus
+
+
+def roulette_selection(population, population_rating, activation_func=softplus):
+    """
+    Perform roulette selection.
+    :param list population: population to perform selection on
+    :param list population_rating: rating of population members
+    :param function activation_func: activation function
+    :returns list: selected chromosomes
+    """
+    return rand_choices(population, weights=activation_func(population_rating), k=len(population))
 
 
 def chromosome_mutation(chromo, problem_dict):
@@ -135,20 +174,21 @@ def genetic_algorithm(problem_dict, pop_size, crossover_prob,
     time_start = datetime.now()
     while best_score_stale_for < stale_limit:
         generation_count += 1
-        print("Starting generation: {}".format(generation_count))
+
         population = population_crossover(population, crossover_prob)
         population = population_mutation(population, problem_dict, mutation_prob)
         population_rating = rate_population(population, scoring_values)
-
         gen_best_index = np.argmax(population_rating)
         gen_best_score = population_rating[gen_best_index]
+
         if gen_best_score > best_score:
             best_score_stale_for = 0
             best_score = gen_best_score
             best_chromo = population[gen_best_index]
         else:
             best_score_stale_for += 1
-
-        population = roulette_selection(population, population_rating)
+        print("Best score for generation {}: {}".format(generation_count, gen_best_score))
+        #population = roulette_selection(population, population_rating, logistic)
+        population = tournament_selection(population, population_rating)
     time_end = datetime.now()
     return GeneticAlgorithmReport(best_chromo, best_score, generation_count, time_end-time_start)

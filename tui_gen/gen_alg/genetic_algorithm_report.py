@@ -2,7 +2,7 @@
 Module containing class descripting genetic algorithm solution and details.
 """
 
-from datetime import datetime
+import hashlib
 
 from tui_gen.gen_alg.rating import create_fenotype
 
@@ -19,6 +19,8 @@ class GeneticAlgorithmReport(object):
     Achieved score of {score}.
     Result visualization:
     {res_vis}
+    Hash of solution:
+    {hash}
     ===="""
 
     def __init__(self, final_chromosome, score, generations, time_taken):
@@ -32,6 +34,7 @@ class GeneticAlgorithmReport(object):
         Generate printable summary.
         :return unicode: printable summary
         """
+
         fenotype = create_fenotype(self.final_chromosome)
         res_vis_list = ["=="]
         for day_index in range(10):
@@ -41,7 +44,13 @@ class GeneticAlgorithmReport(object):
                     time_start.strftime('%H%M'), time_end.strftime('%H%M'), group_code))
             res_vis_list.append("==")
         res_vis = "\n".join(res_vis_list)
+
+        hash_gen_obj = hashlib.md5()
+        hash_gen_obj.update(res_vis.encode('utf8'))
+        hash_hex = hash_gen_obj.hexdigest()
+
         return self._SUMMARY_TEMPLATE.format(total_s=self.time_taken.total_seconds(),
                                              iteration_count=self.generations,
                                              score=self.score,
-                                             res_vis=res_vis)
+                                             res_vis=res_vis,
+                                             hash=hash_hex)
