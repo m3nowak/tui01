@@ -62,7 +62,7 @@ def test_stale_val(pop_size, cross_prob, mutate_prob, stale_vals, prepared_dict,
         scores = []
         times = []
         generations = []
-        for _ in range(10):
+        for _ in range(100):
             alg_gen_report = genetic_algorithm(
                 prepared_dict, pop_size, cross_prob,
                 mutate_prob, stale_val, scoring_dict, False)
@@ -93,8 +93,12 @@ def main():
     mutate_prob_def = 0.1
     stale_vals = [5, 10, 15, 20, 25]
     stale_val_def = 15
-    test_cross_prob(pop_size_def, cross_probs, mutate_prob_def,
-                  stale_val_def, prepared_dict, scoring_dict)
+    alg_gen_report = genetic_algorithm(
+                prepared_dict, 200, 0.8,
+                0.2, 20, scoring_dict)
+    print(alg_gen_report.printable_summary())
+    #test_stale_val(pop_size_def, cross_prob_def, mutate_prob_def,
+    #              stale_vals, prepared_dict, scoring_dict)
 
 
 if __name__ == "__main__":
