@@ -155,7 +155,7 @@ def create_population(problem_dict, size):
 
 
 def genetic_algorithm(problem_dict, pop_size, crossover_prob,
-                      mutation_prob, stale_limit, scoring_values):
+                      mutation_prob, stale_limit, scoring_values, verbose=True):
     """
     Run genetic algorithm.
     :param dict problem_dict: problem dictionary
@@ -164,6 +164,7 @@ def genetic_algorithm(problem_dict, pop_size, crossover_prob,
     :param float mutation_prob: mutation probability
     :param int stale_limit: max number of stale generations (termination condition)
     :param dict scoring_values: dictionary of scoring values
+    :param bool verbose: whether print info during execution
     :returns GeneticAlgorithmReport: final report
     """
     population = create_population(problem_dict, pop_size)
@@ -187,7 +188,8 @@ def genetic_algorithm(problem_dict, pop_size, crossover_prob,
             best_chromo = population[gen_best_index]
         else:
             best_score_stale_for += 1
-        print("Best score for generation {}: {}".format(generation_count, gen_best_score))
+        if verbose:
+            print("Best score for generation {}: {}".format(generation_count, gen_best_score))
         #population = roulette_selection(population, population_rating, logistic)
         population = tournament_selection(population, population_rating)
     time_end = datetime.now()
